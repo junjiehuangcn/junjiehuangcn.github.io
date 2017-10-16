@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Planet</title>
+</head>
+
+<body>
+  <canvas id="planet"></canvas>
+  <style>
+    body{
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #360033;
+      background: -webkit-linear-gradient(to right, #0b8793, #360033);
+      background: linear-gradient(to right, #0b8793, #360033);
+    }
+  </style>
+  <script src="pixi.min.js"></script>
+  <script>
+    var app;
+    var adaptive = createAdaptive({width:1920,height:1080});
+    var adaptiveWidth = function (width) { return adaptive({width:width}).width }
+    var adaptiveHeight = function (height) { return adaptive({height:height}).height }
+    
+    if (document.readyState === 'complete' || document.readyState !== 'loading') {
+      setApp();
+    } else {
+      document.addEventListener('DOMContentLoaded', setApp);
+    }
+    window.addEventListener('resize', setApp);
+    
+    function createAdaptive(layputOption) {
+      var ratio = layputOption.width / layputOption.height;
+      return function (option) {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        if (w / h > ratio) {
+          ch = h;
+          cw = h * ratio;
+        } else {
+          cw = w;
+          ch = w / ratio;
+        }
+        return {
+          height: option.height * ch / layputOption.height,
+          width: option.width * cw / layputOption.width
+        };
+      }
+    }
+    
+    function random(min, max) {
+      if (max == null) { max = min; min = 0; }
+      return min + Math.floor(Math.random() * (max - min + 1));
+    }
+    
+    function setApp(params) {
+      app && app.destroy();
+      app = new PIXI.Application({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        view: document.getElementById('planet'),
+        transparent: true,
+      });
+      
+      var planet = PIXI.Sprite.fromImage('planet.png');
+      planet.width = adaptiveWidth(776);
+      planet.height = adaptiveHeight(776);
+      planet.x = (app.renderer.width - planet.width) / 2;
+      planet.y = (app.renderer.height - planet.height) / 2;
+      app.stage.addChild(planet);
+      
+      var planetWidth = planet.width;
+      var stoneWarp = new PIXI.Container();
+      app.stage.addChild(stoneWarp);
+      [
+        { no: 1, $width: 54, $height: 58, number: 4 }, 
+        { no: 2, $width: 43, $height: 44, number: 8 }, 
+        { no: 3, $width: 33, $height: 30, number: 30 }, 
+        { no: 4, $width: 14, $height: 14, number: 100 }, 
+      ]
+      .forEach(function (option, index) {
+        for (var i = 0; i < option.number; i++) {
+          var stone = PIXI.Sprite.fromImage('stone' + option.no + '.png');
+          stone.anchor.set(0.5);
+          stone.pivot.x = stone.width / 2;
+          stone.pivot.y = stone.height / 2;
+          stone.width = adaptiveWidth(option.$width);
+          stone.height = adaptiveHeight(option.$height);
+          stone.$t = random(0, 600) / 100;
+          stone.$a = planetWidth * random(68, 92) / 100;
+          stone.$b = planetWidth * random(20, 40) / 100;
+          stoneWarp.addChild(stone);
+        }
+      });
+      stoneWarp.rotation = -0.2;
+      stoneWarp.x = (app.renderer.width - stoneWarp.width) / 2;
+      stoneWarp.y = (app.renderer.height - stoneWarp.height) / 2;
+
+      app.ticker.add(function (delta) {
+        stoneWarp.children.forEach(function (obj) {
+          obj.$t += delta / 1000;
+          obj.x = obj.$a * Math.cos(obj.$t);
+          obj.y = obj.$b * Math.sin(obj.$t);
+          obj.rotation += delta / 200;
+          obj.visible = true;
+          if (((obj.x < 0 && obj.y < 0) || (obj.x > 0 && obj.y < 0)) && 
+            (Math.sqrt(Math.pow(obj.x, 2) + Math.pow( obj.y, 2)) < planetWidth / 2)) {
+            obj.visible = false
+          }
+        })
+      });
+    }
+
+</script>
+</body>
+
+</html>
