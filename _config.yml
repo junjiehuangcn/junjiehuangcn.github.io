@@ -19,8 +19,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   记录工作学习的所感所得，存放一些有意思的DEMO，喜欢的话请点Star 👉https://github.com/junjiehuangcn/junjiehuangcn.github.io
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: junjiehuangcn@gmail.com
-github_username:  junjiehuangcn@gmail.com
+github_username:  junjiehuangcn
 
 # Build settings
 markdown: kramdown
